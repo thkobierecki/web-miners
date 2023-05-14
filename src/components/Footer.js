@@ -1,3 +1,7 @@
+"use client"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from 'axios';
 const links = {
   twitter: "https://twitter.com/web3miners",
   discrod: "https://discord.gg/J8UYY7hju6",
@@ -5,6 +9,25 @@ const links = {
 };
 
 const Footer = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle");
+
+  const subscribe = async (e) => {
+    e.preventDefault();
+    setState("Loading");
+
+    try {
+      const response = await axios.post("/api/subscribe", { email });
+      console.log(response);
+      setState("Success");
+      setEmail("");
+      router.push("/thank-you");
+    } catch (e) {
+      console.log(e.response.data.error);
+      setState("Error");
+    }
+  };
   return (
     <footer className="text-black py-2 pb-0">
       <div className="max-w-7xl">
@@ -50,7 +73,7 @@ const Footer = () => {
               Sign up now to get access to our special Web3 Newsletter with
               Educational Web3 Content and more.
             </p>
-            <form className="flex items-center">
+            <form className="flex items-center" onSubmit={subscribe}>
               <label htmlFor="email" className="sr-only">
                 Email Address
               </label>
@@ -58,10 +81,13 @@ const Footer = () => {
                 type="email"
                 id="email"
                 name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="rounded-l-lg py-3 px-4 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
               <button
+                disabled={state === "Loading"}
                 type="submit"
                 className="bg-red-500 hover:bg-red-600 rounded-r-lg text-white font-bold py-3 px-6 ml-4 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
               >
@@ -83,4 +109,4 @@ const Footer = () => {
   );
 };
 
-export default Footer
+export default Footer;

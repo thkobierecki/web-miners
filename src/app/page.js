@@ -1,8 +1,30 @@
+"use client"
 import Navigation from "@/components/Nav";
 import Footer from "@/components/Footer";
-
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from 'axios';
 
 const Hero = () => {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [state, setState] = useState("idle");
+
+  const subscribe = async (e) => {
+    e.preventDefault();
+    setState("Loading");
+
+    try {
+      const response = await axios.post("/api/subscribe", { email });
+      console.log(response);
+      setState("Success");
+      setEmail("");
+      router.push("/thank-you");
+    } catch (e) {
+      console.log(e);
+      setState("Error");
+    }
+  };
   return (
     <section className="py-8">
       <div className="max-w-7xl flex flex-wrap items-center justify-between">
@@ -29,7 +51,7 @@ const Hero = () => {
             <span className="text-red-500">Web3 Cheat Sheet</span> straight to
             your email!
           </p>
-          <form className="flex items-center">
+          <form className="flex items-center" onSubmit={subscribe}>
             <label htmlFor="email" className="sr-only">
               Email Address
             </label>
@@ -37,10 +59,13 @@ const Hero = () => {
               type="email"
               id="email"
               name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="rounded-l-lg py-3 px-4 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <button
+              disabled={state === "Loading"}
               type="submit"
               className="bg-red-500 hover:bg-red-600 rounded-r-lg text-white font-bold py-3 px-6 ml-4 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
             >
